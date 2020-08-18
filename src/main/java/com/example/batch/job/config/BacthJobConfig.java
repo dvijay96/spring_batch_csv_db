@@ -1,5 +1,7 @@
 package com.example.batch.job.config;
 
+import javax.sql.DataSource;
+
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -9,6 +11,8 @@ import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider;
+import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.LineMapper;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
@@ -19,9 +23,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 
-import com.example.batch.job.entity.User;
+import com.example.batch.job.model.User;
 import com.example.batch.job.processor.UserProcessor;
-import com.example.batch.job.writer.UserWriter;
 
 @Configuration
 @EnableBatchProcessing
@@ -32,6 +35,9 @@ public class BacthJobConfig {
 
 	@Autowired
 	private StepBuilderFactory stepBuilderFactory;
+	
+	@Autowired
+	private DataSource dataSource;
 
 	@Bean
 	public Job loadToDb() {
@@ -81,7 +87,11 @@ public class BacthJobConfig {
 
 	@Bean
 	private ItemWriter<User> csvWriter() {
-		return new UserWriter();
+		JdbcBatchItemWriter<User> jdbcWriter = new JdbcBatchItemWriter<>();
+		jdbcWriter.setItemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<User>());
+		jdbcWriter.setSql("INSERT into User values (:id,:name)");
+		jdbcWriter.setDataSource(dataSource);
+		return jdbcWriter;
 	}
 
 	@Bean
