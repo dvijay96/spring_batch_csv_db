@@ -28,18 +28,18 @@ import com.example.batch.job.processor.UserProcessor;
 
 @Configuration
 @EnableBatchProcessing
-public class BacthJobConfig {
+public class UserJobConfig {
 
 	@Autowired
-	private JobBuilderFactory jobBuilderFactory;
+	JobBuilderFactory jobBuilderFactory;
 
 	@Autowired
-	private StepBuilderFactory stepBuilderFactory;
+	StepBuilderFactory stepBuilderFactory;
 	
 	@Autowired
 	private DataSource dataSource;
 
-	@Bean
+	@Bean(name="CSV-DB-Job")
 	public Job loadToDb() {
 		return jobBuilderFactory.get("CSV-DB-Job")
 				.incrementer(new RunIdIncrementer())
@@ -48,7 +48,7 @@ public class BacthJobConfig {
 	}
 
 	@Bean
-	private Step step1() {
+	public Step step1() {
 		return stepBuilderFactory.get("step1")
 				.<User, User>chunk(5)
 				.reader(csvReader())
@@ -58,7 +58,7 @@ public class BacthJobConfig {
 	}
 
 	@Bean
-	private ItemReader<User> csvReader() {
+	public ItemReader<User> csvReader() {
 		FlatFileItemReader<User> reader = new FlatFileItemReader<>();
 		reader.setResource(new ClassPathResource("user.csv"));
 //		reader.setLinesToSkip(1);
@@ -68,7 +68,7 @@ public class BacthJobConfig {
 	}
 
 	@Bean
-	private LineMapper<User> userLineMapper() {
+	public LineMapper<User> userLineMapper() {
 		DefaultLineMapper<User> lineMapper=new DefaultLineMapper<>();
 		
 		DelimitedLineTokenizer tokenizer=new DelimitedLineTokenizer();
@@ -86,7 +86,7 @@ public class BacthJobConfig {
 	}
 
 	@Bean
-	private ItemWriter<User> csvWriter() {
+	public ItemWriter<User> csvWriter() {
 		JdbcBatchItemWriter<User> jdbcWriter = new JdbcBatchItemWriter<>();
 		jdbcWriter.setItemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<User>());
 		jdbcWriter.setSql("INSERT into User values (:id,:name)");
@@ -95,7 +95,7 @@ public class BacthJobConfig {
 	}
 
 	@Bean
-	private ItemProcessor<User, User> csvProcessor() {
+	public ItemProcessor<User, User> csvProcessor() {
 		return new UserProcessor();
 	}
 
