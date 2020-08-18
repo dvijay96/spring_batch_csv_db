@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.stereotype.Component;
 
-import com.example.batch.job.entity.User;
+import com.example.batch.job.model.User;
 
 @Component
 public class UserProcessor implements ItemProcessor<User, User> {
