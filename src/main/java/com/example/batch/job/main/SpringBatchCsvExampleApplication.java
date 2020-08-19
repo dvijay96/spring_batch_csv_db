@@ -1,5 +1,6 @@
 package com.example.batch.job.main;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,7 +33,7 @@ public class SpringBatchCsvExampleApplication implements CommandLineRunner {
 	public void run(String... args) throws Exception {
 
 		Map<String, JobParameter> maps = new HashMap<>();
-		maps.put("time", new JobParameter(System.currentTimeMillis()));
+		maps.put("time", new JobParameter(new Date()));
 
 		JobParameters jobParameters = new JobParameters(maps);
 
